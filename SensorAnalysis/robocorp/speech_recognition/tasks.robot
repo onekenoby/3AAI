@@ -1,12 +1,11 @@
 *** Settings ***
+Library     RPA.FileSystem
+Library     RPA.HTTP
 Library     RPA.Robocorp.Vault
-Library     RPA.Robocorp.File
-Library     RPA.Robocorp.Text
 
 *** Variables ***
 ${AUDIO_FILE}    output.wav
 ${TEXT_FILE}     output.txt
-
 *** Keywords ***
 Capture Audio
     [Documentation]    Capture audio from the microphone

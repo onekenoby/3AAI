@@ -1,43 +1,32 @@
-import pocketsphinx
+import speech_recognition as sr
+from googletrans import Translator
+
+def translate_text(text, dest_language):
+    translator = Translator()
+    result = translator.translate(text, dest=dest_language)
+    return result.text
+translator =Translator()
 
 
-def recognize_italian_speech(audio_file_path):
-    config = pocketsphinx.Config()
-    # Update with the correct path
-    config.set_string('-hmm', 'path/to/italian/acoustic/model')
-    # Update with the correct path
-    config.set_string('-lm', 'path/to/italian/language/model/language_model.lm')
-    # Update with the correct path
-    config.set_string('-dict', 'path/to/italian/language/model/language_model.dic')
+# Initialize recognizer class (for recognizing the speech)
+r = sr.Recognizer()
 
-    decoder = pocketsphinx.Decoder(config)
+# Reading Microphone as source
+# listening the speech and store in audio_text variable
 
-    with AudioFile(audio_file_path) as audio_file:
-        audio_file_info = audio_file.info
-        decoder.start_utt()
+with sr.Microphone() as source:
+    print("Talk")
+    audio_text = r.listen(source)
+    print("Time over, thanks")
+# recoginize_() method will throw a request error if the API is unreachable, hence using exception handling
 
-        while True:
-            buf = audio_file.read(1024)
-            if buf:
-                decoder.process_raw(buf, False, False)
-            else:
-                break
-
-        decoder.end_utt()
-
-    hypothesis = decoder.hyp()
-    if hypothesis:
-        return hypothesis.hypstr
-    else:
-        return None
+    try:
+        # using google speech recognition
+        print("Text_Italian: "+r.recognize_google(audio_text, language="it-IT"))
+        translation = translator.translate(+r.recognize_google(audio_text, language="it-IT"), src='it', dest='en')
+        
+        print("Text_Engl: ", translation)
+    except:
+        print("Sorry, I did not get that")
 
 
-if __name__ == "__main__":
-    # Replace with the path to your audio file
-    audio_file_path = 'path/to/your/audio/file.wav'
-    result = recognize_italian_speech(audio_file_path)
-
-    if result:
-        print("Recognized Italian Speech:", result)
-    else:
-        print("Speech recognition failed.")
