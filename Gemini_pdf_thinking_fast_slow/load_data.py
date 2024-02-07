@@ -16,30 +16,22 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 def main(
     documents_directory: str = "documents",
     collection_name: str = "documents_collection",
-    persist_directory: str = ".",
+    persist_directory: str = "./chroma_storage",
 ) -> None:
-    # Read all files in the data directory
     documents = []
     metadatas = []
     files = os.listdir(documents_directory)
     pdfs = [file for file in files if file.endswith(".pdf")]
     if pdfs:
         for filename in files:
-            # create a PDFQuery object for each pdf file
             pdf = pdfquery.PDFQuery(f"{documents_directory}/{filename}")
-            pdf.load()  # load the pdf file into the object
-            # get the number of pages in the pdf file
+            pdf.load()
             num_pages = len(pdf.pq('LTPage'))
             for page_number in range(num_pages):
-                # get the text elements of each page
                 text_elements = pdf.pq(f'LTPage[pageid="{page_number + 1}"] LTTextLineHorizontal')
-                # extract the text from the elements
                 text = [t.text for t in text_elements]
-                # join the text into a single string
                 text = ' '.join(text)
-                # strip whitespace and append the text to the documents list
                 text = text.strip()
-                # skip empty text
                 if len(text) == 0:
                     continue
                 documents.append(text)
@@ -50,48 +42,38 @@ def main(
                 for line_number, line in enumerate(
                     tqdm((file.readlines()), desc=f"Reading {filename}"), 1
                 ):
-                    # Strip whitespace and append the line to the documents list
                     line = line.strip()
-                    # Skip empty lines
                     if len(line) == 0:
                         continue
                     documents.append(line)
                     metadatas.append({"filename": filename, "line_number": line_number})
 
-    # Instantiate a persistent chroma client in the persist_directory.
-    # Learn more at docs.trychroma.com
     client = chromadb.PersistentClient(path=persist_directory)
 
-    google_api_key = None
     if "GOOGLE_API_KEY" not in os.environ:
         gapikey = input("Please enter your Google API Key: ")
         genai.configure(api_key=gapikey)
-        google_api_key = gapikey
+        GOOGLE_API_KEY = gapikey
     else:
-        google_api_key = os.environ["GOOGLE_API_KEY"]
+        GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
 
-    # create embedding function
     embedding_function = embedding_functions.GoogleGenerativeAiEmbeddingFunction(api_key=GOOGLE_API_KEY)
 
-    # If the collection already exists, we just return it. This allows us to add more
-    # data to an existing collection.
     collection = client.get_or_create_collection(
         name=collection_name, embedding_function=embedding_function
     )
 
-    # Create ids from the current count
     count = collection.count()
     print(f"Collection already contains {count} documents")
     ids = [str(i) for i in range(count, count + len(documents))]
 
-    # Load the documents in batches of 100
     for i in tqdm(
         range(0, len(documents), 100), desc="Adding documents", unit_scale=100
     ):
         collection.add(
             ids=ids[i : i + 100],
             documents=documents[i : i + 100],
-            metadatas=metadatas[i : i + 100],  # type: ignore
+            metadatas=metadatas[i : i + 100],
         )
 
     new_count = collection.count()
@@ -99,12 +81,10 @@ def main(
 
 
 if __name__ == "__main__":
-    # Read the data directory, collection name, and persist directory
     parser = argparse.ArgumentParser(
         description="Load documents from a directory into a Chroma collection"
     )
 
-    # Add arguments
     parser.add_argument(
         "--data_directory",
         type=str,

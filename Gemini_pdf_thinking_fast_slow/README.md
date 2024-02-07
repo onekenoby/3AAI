@@ -1,21 +1,20 @@
 # Chat with your documents
 
-This folder contains a (very) minimal, self-contained example of how to make an application to chat with your documents, using Chroma and Google Gemini's API.
-It uses the 2022 and 2023 U.S state of the union addresses as example documents.
+This folder contains an example of how to make an application to chat with your documents, using Chroma and Google Gemini's API.
+It uses the 'Thinking, fast and slow' book by Daniel Kahneman. 
 
 ## How it works
 
 The basic flow is as follows:
 
-0. The text documents in the `documents` folder are loaded line by line, then embedded and stored in a Chroma collection.
-
-1. When the user submits a question, it gets embedded using the same model as the documents, and the lines most relevant to the query are retrieved by Chroma.
+0. The pdf document in the `documents` folder is loaded page by page, then embedded and stored in a Chroma collection.
+1. When the user submits a question, it gets embedded using the same model as the document, and the lines most relevant to the query are retrieved by Chroma.
 2. The user-submitted question is passed to Google Gemini's API, along with the extra context retrieved by Chroma. The Google Gemini API generates a response.
 3. The response is displayed to the user, along with the lines used as extra context.
 
-## Running the example
+## Running the code
 
-You will need an Google API key to run this demo.
+You will need a Google API key to run this demo.
 
 Install dependencies and run the example:
 
@@ -33,21 +32,35 @@ python main.py
 Example output:
 
 ```
-Query: What was said about the pandemic?
+Query: Tell me something about system 1 and system 2
 
 Thinking...
 
-Based on the given context, several points were made about the pandemic. First, it is described as punishing, indicating the severity and impact it had on various aspects of life. It is mentioned that schools were closed and everything was being shut down in response to the COVID crisis, suggesting the significant measures taken to combat the virus.
+System 1 and System 2 are two distinct modes of thinking that exist within our minds. 
 
-The context then shifts to discussing the progress made in the fight against the pandemic itself. While no specific details are provided, it is implied that there has been progress, though the extent of it is unclear.
+System 1 is fast, automatic, effortless, intuitive, and operates outside of our conscious awareness. It's responsible for making quick judgments and associations based on limited information, relying on heuristics and biases. System 1 is often emotional and impulsive.
 
-Additionally, it is stated that children were already facing struggles before the pandemic, such as bullying, violence, trauma, and the negative effects of social media. This suggests that these issues were likely exacerbated by the pandemic.
+System 2, on the other hand, is slow, deliberate, controlled, rational, and requires conscious effort and attention. It's capable of complex logical reasoning, analyzing information systematically, and making well-thought-out decisions. System 2 is more analytical and reflective.
 
-The context then mentions a spike in violent crime in 2020, which is attributed to the first year of the pandemic. This implies that there was an increase in violent crime during that time period, but the underlying causes or specific details are not provided.
+System 1 is constantly active, processing information and making judgments, while System 2 only engages when needed or when System 1 is uncertain or conflicted. System 2 can override the impulses and intuitions of System 1 through conscious effort and deliberate reasoning.
 
-Lastly, it is mentioned that the pandemic also disrupted global supply chains. Again, no specific details are given, but this suggests that the pandemic had negative effects on the movement and availability of goods and resources at a global level.
+The interaction between System 1 and System 2 is dynamic and influences our thoughts, feelings, and actions. While System 1 often provides quick and efficient solutions, it can also lead to errors and biases due to its reliance on heuristics and limited information. System 2 can help correct these errors by applying more rigorous and analytical thinking.
 
-In conclusion, based on the provided context, it is stated that the pandemic has been punishing and has resulted in the closure of schools and the shutdown of various activities. Progress is mentioned in fighting against the pandemic, though the specifics are not given. The pandemic is also said to have worsened pre-existing issues such as bullying and violence among children, and disrupted global supply chains.
+Understanding the differences between System 1 and System 2 can help us make better decisions by being more aware of our cognitive biases, slowing down to engage System 2 when appropriate, and seeking out diverse perspectives to challenge our initial intuitions.
+--------------------------------------------------------------------------------
+Sources:
+Thinking, Fast and Slow by Daniel Kahneman.pdf: page_number 80, ID: 73, Distance: 0.54
+Thinking, Fast and Slow by Daniel Kahneman.pdf: page_number 522, ID: 505, Distance: 0.53
+Thinking, Fast and Slow by Daniel Kahneman.pdf: page_number 60, ID: 53, Distance: 0.52
+Thinking, Fast and Slow by Daniel Kahneman.pdf: page_number 23, ID: 16, Distance: 0.52
+Thinking, Fast and Slow by Daniel Kahneman.pdf: page_number 92, ID: 85, Distance: 0.49
+Thinking, Fast and Slow by Daniel Kahneman.pdf: page_number 24, ID: 17, Distance: 0.49
+Thinking, Fast and Slow by Daniel Kahneman.pdf: page_number 27, ID: 20, Distance: 0.42
+Thinking, Fast and Slow by Daniel Kahneman.pdf: page_number 51, ID: 44, Distance: 0.42
+Thinking, Fast and Slow by Daniel Kahneman.pdf: page_number 32, ID: 25, Distance: 0.38
+Thinking, Fast and Slow by Daniel Kahneman.pdf: page_number 40, ID: 33, Distance: 0.35
+--------------------------------------------------------------------------------
+
 ```
 
-You can replace the example text documents in the `documents` folder with your own documents, and the chatbot will use those instead.
+You can replace the example pdf documents in the `documents` folder with your own documents, and the chatbot will use those instead.
