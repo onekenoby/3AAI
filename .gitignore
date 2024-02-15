@@ -3,3 +3,4 @@ data-postgres_data_15000_rv_sens_all.csv
 *.h5
 *.keras
 .env
+.sqlite3
