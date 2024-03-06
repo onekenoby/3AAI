@@ -21,7 +21,9 @@ class CustomVectorDB:
                 )''')
         self.conn.commit()
 
-    # funzione che prende in input la query e il valore di soglia (opzionale)
+    # Funzione che prende in input la query e il valore di soglia (opzionale)
+    # Restituisce una lista con i risultati in base alla soglia (in ordine decrescente se più di uno)
+    # Restituisce una lista vuota se non trova nulla
     def retrieve_sql(self, input_sentence, threshold=0.9):
         input_vector = self.embedding.encode(input_sentence.lower())
         self.cursor.execute('''SELECT sql, metadata, vector FROM sql_queries''')
@@ -40,6 +42,7 @@ class CustomVectorDB:
 
     # Funzione che prende in input una lista di json annidati per inserimento in banca dati
     # Vedere il file training.json come riferimento per struttura json
+    # NB: da implementare gestione di errore (es. viene un json con una struttura che non corrisponde a quella utilizzata al momento)
     def add_sql(self, data):
         for i, doc in enumerate(data):
             vector = self.embedding.encode(doc['metadata'].lower())
@@ -48,12 +51,14 @@ class CustomVectorDB:
         self.conn.commit()
 
     # Funzione che prende in input lista di ids per eliminazione di record in banca dati
+    # NB: da implementare gestione di errore (es. viene passato un id che non esiste)
     def delete_sql(self,ids):
         for i in ids:
             self.cursor.execute('DELETE FROM sql_queries WHERE id = '+i)
         self.conn.commit()
 
     # Funzione che restituisce tutte i record presenti in banca dati
+    # Restituisce un oggetto vuoto se non ci sono record
     def getAll_sql(self):
         self.cursor.execute('''SELECT * FROM sql_queries''')
         results = self.cursor.fetchall()
@@ -61,6 +66,7 @@ class CustomVectorDB:
         return results
 
     # Funzione che prende in input la query da ricercare in banca dati (ricerca su stringa esatta)
+    # Restituisce un oggetto vuoto se non trova nulla
     def get_sql(self,query):
         self.cursor.execute("SELECT * FROM sql_queries WHERE metadata = "+query)
         result = self.cursor.fetchall()
