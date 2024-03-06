@@ -1,0 +1,58 @@
+[
+    {
+        "metadata":"Dammi il range temporale solamente per il sensore 2 e aggiungi commenti",
+        "sql":"SELECT\\ min(pkt_time) AS range_temporale_minimo, -- Minimum timestamp for the given sensor\\  max(pkt_time) AS range_temporale_massimo, -- Maximum timestamp for the given sensor\\ id_topic AS sensori                    -- Sensor ID\\ FROM\\  measurement\\ WHERE\\ id_topic = 2                            -- Filter for sensor with id_topic 2\\ GROUP BY\\ id_topic;                            -- Group by sensor ID"
+    },
+    {
+        "metadata":"Mostrami tutti gli alert per il sensore 1",
+        "sql":"SELECT a.trigger_time,a.ae_value FROM alert a JOIN sensor s ON a.id_topic = s.id WHERE s.id = 1"
+    },
+    {
+        "metadata":"Per il sensore 5 mostrami su un time bucket di 15 minuti la media, la minima e la massima del valore ae",
+        "sql":"SELECT\\ time_bucket('15 minute', pkt_time) as bucket,\\ id_topic,\\ avg(ae_value) as avg,\\ max(ae_value) as max,\\ min(ae_value) as min\\ FROM\\ measurement\\ where\\ id_topic = 5\\ GROUP BY bucket, id_topic\\ order by bucket;"
+    },
+    {
+        "metadata":"mostrami per il sensore 5 i primi 100 risultati in ordine temporale del valore ae",
+        "sql":"SELECT ae_value, pkt_time FROM measurement WHERE id_topic = 5 ORDER BY pkt_time ASC LIMIT 100;"
+    },
+    {
+        "metadata":"mostrami tutti i sensori",
+        "sql":"SELECT * FROM measurement"
+    },
+    {
+        "metadata":"Mostrami per il sensore 1, 100 elementi, con timestamp, knt, ae, ae_cl, dove ae_cl è 0, 1 o 2 per valori compresi rispettivamente tra 0 e 0.4, 0.4 e 0.55, 0.55 e 1.0, e i valori rv",
+        "sql": "SELECT \\tm, \\knt, \\ae, \\CASE \\WHEN ae >= 0 AND ae <= 0.40 THEN 0 \\WHEN ae > 0.40 AND ae <= 0.55 THEN 1 \\WHEN ae > 0.55 AND ae <= 1.00 THEN 2 \\END AS ae_cl, \\TRANSLATE(TRANSLATE(rv, '[', ''), ']', '') AS rv \\FROM ( \\SELECT \\ pkt_time::TIMESTAMP tm, \\ae_value ae, \\( \\SELECT jsonb_agg(t ->> 'rv')::TEXT \\FROM json_array_elements(pkt_metric) AS x(t) \\) AS rv, \\jsonb_array_length( \\( \\SELECT jsonb_agg(t ->> 'rv')::JSONB \\FROM json_array_elements(pkt_metric) AS x(t) \\) \\) AS knt \\FROM \\measurement \\WHERE \\id_topic = 1 \\AND ae_value >= 0 \\AND ae_value <> 'NaN'::NUMERIC \\LIMIT 100 \\) r_v;" 
+    },
+    {
+        "metadata" :"Mostrami i sensori con valori di AE compresi tra 0.41 e 0.55",
+        "sql":"SELECT topic FROM sensor WHERE id IN ( SELECT id_topic FROM alert WHERE ae_value BETWEEN 0.45 AND 0.55"
+    },
+    {
+        "metadata": "Quali sono gli ultimi 10 valori misurati dal sensore 'Sensore 01 LF1'?",
+        "sql":"  SELECT pkt_time, ae_value FROM measurement WHERE id_topic = ( SELECT id FROM sensor WHERE label = 'Sensore 01 LF') ORDER BY pkt_time DESC LIMIT 10;"
+    },
+    {
+        "metadata":"Quali sono i valori di ae registrati da tutti i sensori negli ultimi 10 minuti?",
+        "sql": "SELECT * FROM measurement WHERE pkt_time >= NOW() - INTERVAL '10 minutes';"
+    },
+    {
+        "metadata" : "mostrami i sensori che hanno generato alert negli ultimi 10 minuti",
+        "sql" : "SELECT DISTINCT s.label AS sensor_label FROM alert a JOIN sensor s ON a.id_topic = s.id WHERE a.trigger_time >= NOW() - INTERVAL '10 minutes';"
+    },
+    {
+        "metadata" : "mostrami il valore minimo di ae del sensore 1 durante l'ultimo anno",
+        "sql" : "SELECT MIN(ae_value) FROM measurement WHERE id_topic = (SELECT id FROM sensor WHERE id = 1) AND pkt_time BETWEEN NOW() - INTERVAL '1 year' AND NOW();"
+    },
+    {
+        "metadata": "Qual è il valore medio dell'ae del sensore 3 nell'ultima settimana?",
+        "sql": "SELECT AVG(ae_value) FROM measurement WHERE id_topic = (SELECT id FROM sensor WHERE id = 3) AND pkt_time BETWEEN NOW() - INTERVAL '1 week' AND NOW();"
+    },
+    {
+        "metadata" : "Quanti alert sono stati registrati nell'ultimo mese per ciascun livello di gravità?",
+        "sql" : "SELECT label,count(*) AS alerts_countFROM alert a JOIN alert_severity s ON a.id_topic = s.id WHERE a.trigger_time >= now() - interval '1 month' Group BY label"
+    },
+    {
+        "metadata" : "Qual è il sensore con il valore minimo di misurazione più basso nell'ultimo mese?",
+        "sql" : "SELECT sensor.label, MIN(measurement.ae_value) AS min_ae_value FROM measurement JOIN sensor ON measurement.id_topic = sensor.id WHERE measurement.pkt_time >= NOW() - INTERVAL '1 month' GROUP BY sensor.label ORDER BY min_ae_value ASC LIMIT 1;"
+    }
+]
