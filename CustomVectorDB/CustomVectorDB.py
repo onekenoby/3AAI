@@ -22,23 +22,25 @@ class CustomVectorDB:
         self.conn.commit()
 
     # Funzione che prende in input la query e il valore di soglia (opzionale)
-    # Restituisce una lista con i risultati in base alla soglia (in ordine decrescente se più di uno)
+    # Se trova più di un risultato restituisce il record con la similarità più alta
+    # In ordine restituisce ID, SQL, METADATA, SIMILARITY
     # Restituisce una lista vuota se non trova nulla
-    def retrieve_sql(self, input_sentence, threshold=0.9):
+    def retrieve_sql(self, input_sentence, threshold=0.8):
         input_vector = self.embedding.encode(input_sentence.lower())
-        self.cursor.execute('''SELECT sql, metadata, vector FROM sql_queries''')
+        self.cursor.execute('''SELECT id, sql, metadata, vector FROM sql_queries''')
         results = self.cursor.fetchall()
         relevant_results = []
         for result in results:
-            stored_vector = json.loads(result[2])
+            stored_vector = json.loads(result[3])
             similarity = cosine_similarity([input_vector], [stored_vector])[0][0]
             if similarity > threshold:
-                relevant_results.append([result[0], result[1], float(similarity)])
+                relevant_results.append([result[0], result[1], result[2], similarity])
         
         if len(relevant_results)>1:
-            relevant_results = sorted(relevant_results,key=lambda x: x[2], reverse=True)
-
-        return relevant_results
+            relevant_results = sorted(relevant_results,key=lambda x: x[3], reverse=True)
+            return relevant_results[0]
+        else:
+            return relevant_results
 
     # Funzione che prende in input una lista di json annidati per inserimento in banca dati
     # Vedere il file training.json come riferimento per struttura json
@@ -68,7 +70,7 @@ class CustomVectorDB:
     # Funzione che prende in input la query da ricercare in banca dati (ricerca su stringa esatta)
     # Restituisce un oggetto vuoto se non trova nulla
     def get_sql(self,query):
-        self.cursor.execute("SELECT * FROM sql_queries WHERE metadata = "+query)
+        self.cursor.execute("SELECT * FROM sql_queries WHERE metadata = '"+query+"'")
         result = self.cursor.fetchall()
 
         return result
