@@ -39,7 +39,7 @@ class CustomVectorDB:
             if similarity > threshold:
                 relevant_results.append([result[0], result[1], result[2], similarity])
         
-        if len(relevant_results)>1:
+        if len(relevant_results)>=1:
             relevant_results = sorted(relevant_results,key=lambda x: x[3], reverse=True)
             return relevant_results[0]
         else:
