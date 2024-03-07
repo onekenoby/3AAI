@@ -72,7 +72,7 @@ class CustomVectorDB:
     # Informazioni restituite: ID, SQL, METADATA
     # Restituisce un oggetto vuoto se non trova nulla
     def get_sql(self,query):
-        self.cursor.execute("SELECT id, sql, metadata FROM sql_queries WHERE metadata = '"+query+"'")
+        self.cursor.execute("SELECT id, sql, metadata FROM sql_queries WHERE metadata LIKE '"+query+"'")
         result = self.cursor.fetchall()
 
         return result
