@@ -2,6 +2,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 import json
 import sqlite3
+import os
 
 class CustomVectorDB:
 
@@ -9,7 +10,9 @@ class CustomVectorDB:
     # Se non esiste, il db sqlite viene creato
     # Se non esiste, la tabella sql_queries viene creata con i campi (id, sql, metadata, vector)
     def __init__(self, path):
-        self.conn = sqlite3.connect(path+'/vector_db.sqlite')
+        if not os.path.exists(path):
+            os.makedirs(path)
+        self.conn = sqlite3.connect(path + 'vector_db.sqlite')
         self.cursor = self.conn.cursor()
         self.embedding = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
