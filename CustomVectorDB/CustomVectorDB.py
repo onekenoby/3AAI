@@ -56,11 +56,18 @@ class CustomVectorDB:
         self.conn.commit()
 
     # Funzione che prende in input lista di ids per eliminazione di record in banca dati
+    # Introdotto parametro multiple delete, impostato di default a False
+    # Con multiple delete a false, il parametro ids deve essere solamente il singolo id (stringa o numero)
+    # Se multiple delete è impostato a true, ids deve essere una lista di id
     # NB: da implementare gestione di errore (es. viene passato un id che non esiste)
-    def delete_sql(self,ids):
-        for i in ids:
-            self.cursor.execute('DELETE FROM sql_queries WHERE id = '+i)
-        self.conn.commit()
+    def delete_sql(self,ids, multiple_delete=False):
+        if multiple_delete:
+            for i in ids:
+                self.cursor.execute('DELETE FROM sql_queries WHERE id = '+i)
+            self.conn.commit()
+        else:
+            self.cursor.execute('DELETE FROM sql_queries WHERE id = '+ids)
+            self.conn.commit()
 
     # Funzione che restituisce tutte i record presenti in banca dati
     # Informazioni restituite: ID, SQL, METADATA
