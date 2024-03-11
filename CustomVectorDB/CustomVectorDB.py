@@ -47,27 +47,31 @@ class CustomVectorDB:
 
     # Funzione che prende in input una lista di json annidati per inserimento in banca dati
     # Vedere il file training.json come riferimento per struttura json
-    # NB: da implementare gestione di errore (es. viene un json con una struttura che non corrisponde a quella utilizzata al momento)
     def add_sql(self, data):
-        for i, doc in enumerate(data):
-            vector = self.embedding.encode(doc['metadata'].lower())
-            vector_list = [i for i in vector]
-            self.cursor.execute('''INSERT INTO sql_queries (sql, metadata, vector) VALUES (?, ?, ?)''', (doc['sql'], doc['metadata'], str(vector_list)))
-        self.conn.commit()
+        try:
+            for i, doc in enumerate(data):
+                vector = self.embedding.encode(doc['metadata'].lower())
+                vector_list = [i for i in vector]
+                self.cursor.execute('''INSERT INTO sql_queries (sql, metadata, vector) VALUES (?, ?, ?)''', (doc['sql'], doc['metadata'], str(vector_list)))
+            self.conn.commit()
+        except Exception as e:
+            print("ERROR: "+str(e))
 
     # Funzione che prende in input lista di ids per eliminazione di record in banca dati
     # Introdotto parametro multiple delete, impostato di default a False
     # Con multiple delete a false, il parametro ids deve essere solamente il singolo id (stringa o numero)
     # Se multiple delete è impostato a true, ids deve essere una lista di id
-    # NB: da implementare gestione di errore (es. viene passato un id che non esiste)
     def delete_sql(self,ids, multiple_delete=False):
-        if multiple_delete:
-            for i in ids:
-                self.cursor.execute('DELETE FROM sql_queries WHERE id = '+i)
-            self.conn.commit()
-        else:
-            self.cursor.execute('DELETE FROM sql_queries WHERE id = '+ids)
-            self.conn.commit()
+        try:
+            if multiple_delete:
+                for i in ids:
+                    self.cursor.execute('DELETE FROM sql_queries WHERE id = '+i)
+                self.conn.commit()
+            else:
+                self.cursor.execute('DELETE FROM sql_queries WHERE id = '+ids)
+                self.conn.commit()
+        except Exception as e:
+            print("ERROR: "+str(e))
 
     # Funzione che restituisce tutte i record presenti in banca dati
     # Informazioni restituite: ID, SQL, METADATA
